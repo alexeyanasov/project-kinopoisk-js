@@ -5,36 +5,51 @@ function apiSearch(event){
 	event.preventDefault()
 	const searchText = document.querySelector('#search-text').value,
 	server = 'https://api.themoviedb.org/3/search/multi?api_key=982295ace49e6e01b6d97a1fb4539451&language=ru&query=' + searchText
-	requestApi('GET', server)
+	movie.innerHTML = 'Загрузка'
+
+// через Promise
+requestApi(server)
+.then(function(result){
+	const output = JSON.parse(result)
+	console.log(output)
+	let inner = ''
+
+	output.results.forEach(function(item){
+		let nameItem = item.name || item.title
+		inner += `<div class="col-12 col-md-4 col-xs-3">${nameItem}</div>`
+	})
+	movie.innerHTML = inner
+})
+.catch(function(reason){
+	movie.innerHTML = 'Упс, что-то пошло не так'
+	console.log('error: ' + reason.status)
+})
 }
 searchForm.addEventListener('submit', apiSearch)
 
 // функция обращения к серверу
-function requestApi(method, url){
-	// Объект XMLHttpRequest
-	const request = new XMLHttpRequest();
-	// По умолчанию асинхронно (true)
-	request.open('GET', url)
-	// Ждем ответ от сервера
-	request.send()
-
-	request.addEventListener('readystatechange', () => {
-		if(request.readyState !== 4) return
-			
-		if(request.status !== 200){
-			console.log('error: ' + request.status)
-			return
-		}
-		const output = JSON.parse(request.responseText)
-
-		let inner = ''
-
-		output.results.forEach(function(item){
-			let nameItem = item.name || item.title
-			// console.log(nameItem)
-			inner += `<div class="col-12">${nameItem}</div>`
+function requestApi(url){
+	return new Promise (function (resolve, reject){
+		// Объект XMLHttpRequest
+		const request = new XMLHttpRequest();
+		// Задаем настройки. По умолчанию асинхронно (true)
+		request.open('GET', url)
+		request.addEventListener('load', function(){
+			if(request.status !== 200){
+				reject({
+					status: request.status
+				})
+				return
+			}
+			resolve(request.response)
 		})
-		movie.innerHTML = inner
-		console.log(output)
+
+		request.addEventListener('error', function(){
+			reject({
+				status: request.status
+			})
+		})
+		// Ждем ответ от сервера
+		request.send()
 	})
 }
