@@ -1,6 +1,9 @@
 img{
 	max-width: 100%;
 }
+.img-poster{
+	height: 360px;
+}
 .item{
 	margin: 15px 0;
 	text-align: center;

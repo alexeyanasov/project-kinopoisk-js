@@ -19,16 +19,17 @@ function apiSearch(event){
 		let inner = ''
 		output.results.forEach(function(item){
 			let nameItem = item.name || item.title
+			const poster = item.poster_path ? urlPoster + item.poster_path : './img/noposter.png'
 			inner += 
-			`<div class="col-12 col-md-4 col-xs-3 item">
-				<img src="${urlPoster + item.poster_path}" alt="${nameItem}" />
+			`<div class="col-12 col-md-6 col-xs-3 item">
+				<img class="img-poster" src="${poster}" alt="${nameItem}" />
 				<h5>${nameItem}</h5>
 			</div>`
 		})
 		movie.innerHTML = inner
 	})
 	.catch(function(reason){
-		movie.innerHTML = `<div class="col-12 col-md-4 col-xs-3">Упс, что-то пошло не так</div>`
+		movie.innerHTML = `<div class="col-12 col-md-6 col-xs-3">Упс, что-то пошло не так</div>`
 		console.log('error: ' + reason)
 	})
 }
