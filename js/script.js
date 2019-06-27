@@ -73,7 +73,7 @@ function showFullInfo(){
 		}
 		return value.json()
 	})
-	.then(function(output){
+	.then((output) => {
 		// if(output.status === 'Ended'){
 		// 	output.status = 'Закончился'
 		// }else if(output.status === 'Released'){
