@@ -1,6 +1,7 @@
 const searchForm = document.querySelector('#search-form')
 const movie = document.querySelector('#movies')
 const urlPoster = 'https://image.tmdb.org/t/p/w500'
+const APIkey = '982295ace49e6e01b6d97a1fb4539451'
 function apiSearch(event){
 	event.preventDefault()
 	const searchText = document.querySelector('#search-text').value
@@ -8,7 +9,7 @@ function apiSearch(event){
 		movie.innerHTML = '<h2 class="col-12 text-center text-danger">Поле поиска не должно быть пустым</h2>'
 		return
 	}
-	const server = 'https://api.themoviedb.org/3/search/multi?api_key=982295ace49e6e01b6d97a1fb4539451&language=ru&query=' + searchText
+	const server = 'https://api.themoviedb.org/3/search/multi?api_key=' + APIkey + '&language=ru&query=' + searchText
 	movie.innerHTML = `<div class="spinner"></div>`
 	// Через fetch
 	fetch(server)
@@ -74,15 +75,19 @@ function showFullInfo(){
 		return value.json()
 	})
 	.then((output) => {
-		// if(output.status === 'Ended'){
-		// 	output.status = 'Закончился'
-		// }else if(output.status === 'Released'){
-		// 	output.status = 'Вышел'
-		// }else{
-		// 	output.status = output.status
-		// }
-		console.log(output)
-		movie.innerHTML = `
+		if(output.status === 'Ended'){
+			output.status = 'Закончился'
+		}else if(output.status === 'Released'){
+			output.status = 'Вышел'
+		}else{
+			output.status = output.status
+		}
+		let genres = '';
+		output.genres.forEach((genre) => { genres += genre.name + ', '})
+		genres = genres.substr(0, genres.length - 2)
+		// console.log(output)
+		movie.innerHTML = 
+		`
 		<h4 class="col-12 text-center text-info">${output.name || output.title}</h4>
 		<div class="col-4">
 		<img src="${urlPoster + output.poster_path}" alt="${output.name || output.title}" />
@@ -90,9 +95,10 @@ function showFullInfo(){
 		${(output.imdb_id) ? `<p class="text-center"><a href="https://imdb.com/title/${output.imdb_id}" target="_blank">Страница на IMDB.com</a></p>` : ''}
 		</div>
 		<div class="col-8">
-		<p>Рейтинг: ${output.vote_average}</p>
-		<p>Статус: ${output.status}</p>
-		<p>Премьера: ${output.first_air_date || output.release_date}</p>
+		<p class="badge badge-info p-2">Рейтинг: ${output.vote_average}</p> <br>
+		<p class="badge badge-danger p-2">Статус: ${output.status}</p> <br>
+		<p class="badge badge-dark p-2">Жанр: ${genres}</p> <br>
+		<p class="badge badge-success p-2">Премьера: ${output.first_air_date || output.release_date}</p> <br>
 		${(output.last_episode_to_air) ? `<p>${output.number_of_seasons} сезон ${output.last_episode_to_air.episode_number} серий вышло</p>` : '' }
 		<p><b>Описание:</b> <br>${output.overview}</p>
 		<br>
@@ -158,12 +164,17 @@ document.addEventListener('DOMContentLoaded', function(){
 			// console.log(item)
 			let nameItem = item.name || item.title
 			let mediaType = item.title ? 'movie' : 'tv'
+			let rating = item.vote_average || 'нет'
+			let dataItem = item.first_air_date || item.release_date || 'неизвестна'
 			const poster = item.poster_path ? urlPoster + item.poster_path : './img/noposter.png'
 			let dataInfo = `data-id="${item.id}" data-type="${mediaType}"`
 			inner += 
-			`<div class="col-12 col-md-6 col-xl-3 item">
+			`
+			<div class="col-12 col-md-6 col-xl-3 item card">
 			<img class="img-poster" src="${poster}" alt="${nameItem}" ${dataInfo}/>
 			<h5>${nameItem}</h5>
+			<p class="card-text"><span class="badge badge-info p-2">Рейтинг: ${rating}</span></p>
+			<p class="card-text text-primary">Дата выхода:<br/>${dataItem}</p>
 			</div>`
 		})
 		movie.innerHTML = inner
